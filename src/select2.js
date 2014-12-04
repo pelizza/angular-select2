@@ -30,6 +30,12 @@ angular.module("rt.select2", [])
             template: "<input type=\"hidden\"></input>",
             replace: true,
             link: function (scope, element, attrs, controller) {
+                var AJS = window.AJS || {}; // jshint ignore:line
+                if ((typeof AJS.$ === "function") && (typeof AJS.$().auiSelect2 === "function")) {
+                    element = AJS.$("#" + element.attr("id"));
+                    element.select2 = AJS.$().auiSelect2;
+                }
+
                 var getOptions;
 
                 var opts = angular.extend({}, defaultOptions, scope.$eval(attrs.options));
