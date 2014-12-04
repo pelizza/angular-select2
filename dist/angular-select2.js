@@ -33,6 +33,12 @@ angular.module("rt.select2", [])
                 var getOptions;
 
                 var opts = angular.extend({}, defaultOptions, scope.$eval(attrs.options));
+                if (attrs.emptyItem) {
+                    opts.emptyItem = {
+                        id: "EMPTY_ITEM",
+                        text: attrs.emptyItem
+                    };
+                }
                 var isMultiple = angular.isDefined(attrs.multiple) || opts.multiple;
 
                 opts.multiple = isMultiple;
@@ -81,6 +87,10 @@ angular.module("rt.select2", [])
                         var keys = (keyName ? sortedKeys(values) : values) || [];
 
                         var options = [];
+                        if (opts.emptyItem) {
+                            optionItems[opts.emptyItem.id] = opts.emptyItem;
+                            options.push(opts.emptyItem);
+                        }
                         for (var i = 0; i < keys.length; i++) {
                             var locals = {};
                             var key = i;
@@ -112,6 +122,9 @@ angular.module("rt.select2", [])
                         var keys = (keyName ? sortedKeys(values) : values) || [];
 
                         var options = [];
+                        if (query.term === "" && opts.emptyItem) {
+                            options.push(opts.emptyItem);
+                        }
                         for (var i = 0; i < keys.length; i++) {
                             var locals = {};
                             var key = i;
@@ -185,7 +198,11 @@ angular.module("rt.select2", [])
                         });
                     } else {
                         getOptions(function () {
-                            callback(optionItems[controller.$viewValue] || { obj: {} });
+                            if (opts.emptyItem && !controller.$viewValue) {
+                                callback(opts.emptyItem);
+                            } else {
+                                callback(optionItems[controller.$viewValue] || { obj: {} });
+                            }
                         });
                     }
                 }
@@ -229,8 +246,12 @@ angular.module("rt.select2", [])
                                 }
                                 modelFn.assign(scope, vals);
                             } else {
-                                val = optionItems[e.val];
-                                modelFn.assign(scope, val ? val.id : null);
+                                if (opts.emptyItem && e.val === opts.emptyItem.id) {
+                                    modelFn.assign(scope, null);
+                                } else {
+                                    val = optionItems[e.val];
+                                    modelFn.assign(scope, val ? val.id : null);
+                                }
                             }
                         });
                     });
